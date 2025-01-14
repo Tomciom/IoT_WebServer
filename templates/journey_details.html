@@ -178,212 +178,213 @@
     </style>
 </head>
 <body>
-    <div class="sidebar">
-        <div>
-            <a href="{{ url_for('home.home') }}">Strona Główna</a>
-            <a href="{{ url_for('current_journey.current_journey')}}">Aktualna Podróż</a>
-            <a href="{{ url_for('new_journey.new_journey') }}">Nowa Podróż</a>
-            <a href="{{ url_for('journey_history.journey_history') }}">Historia Podróży</a>
-        </div>
-        <a href="{{ url_for('login.logout') }}">Wyloguj</a>
-    </div>
-
-    <div class="content">
-        <h1>Szczegóły Podróży #{{ journey_id }}</h1>
-
-        <h2>Wykresy</h2>
-        <!-- Rząd 1: Temperatura i Ciśnienie -->
-        <div class="plot-row">
-            <div id="temperature-plot" class="plot-container"></div>
-            <div id="pressure-plot" class="plot-container"></div>
+        <div class="sidebar">
+            <div>
+                <a href="{{ url_for('home.home') }}">Strona Główna</a>
+                <a href="{{ url_for('boards.boards', username=username) }}">Twoje Urządzenia</a>
+                <a href="{{ url_for('current_journey.current_journey')}}">Aktualna Podróż</a>
+                <a href="{{ url_for('new_journey.new_journey') }}">Nowa Podróż</a>
+                <a href="{{ url_for('journey_history.journey_history') }}">Historia Podróży</a>
+            </div>
+            <a href="{{ url_for('login.logout') }}">Wyloguj</a>
         </div>
 
-        <!-- Rząd 2: Obrót i Przyspieszenie -->
-        <div class="plot-row">
-            <div id="rotation-plot" class="plot-container"></div>
-            <div id="acceleration-plot" class="plot-container"></div>
-        </div>
-        <h2>Dane Pomiarowe</h2>
-        <div class="scrollable-table">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Timestamp</th>
-                        <th>Temperatura (°C)</th>
-                        <th>Ciśnienie (hPa)</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for row in measurements %}
-                    <tr>
-                        <td>{{ row.timestamp }}</td>
-                        <td>{{ row.temperature }}</td>
-                        <td>{{ row.pressure }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
+        <div class="content">
+            <h1>Szczegóły Podróży #{{ journey_id }}</h1>
 
-        <h2>Wykrycie Ognia</h2>
-        <div class="scrollable-table">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Timestamp</th>
-                        <th>Wykryto Ogień</th>
-                        <th>Wartość Czujnika</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for row in fire_data if row.fire_detected %}
-                    <tr>
-                        <td>{{ row.timestamp }}</td>
-                        <td class="fire-detected">Tak</td>
-                        <td>{{ row.sensor_value }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
+            <h2>Wykresy</h2>
+            <!-- Rząd 1: Temperatura i Ciśnienie -->
+            <div class="plot-row">
+                <div id="temperature-plot" class="plot-container"></div>
+                <div id="pressure-plot" class="plot-container"></div>
+            </div>
 
-        <h2>Obrót i Przyspieszenie</h2>
-        <div class="scrollable-table">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Timestamp</th>
-                        <th>Obrót (°) w x</th>
-                        <th>Obrót (°) w y</th>
-                        <th>Obrót (°) w z</th>
-                        <th>GX</th>
-                        <th>GY</th>
-                        <th>GZ</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for row in rotation_data %}
-                    <tr>
-                        <td>{{ row.timestamp }}</td>
-                        <td>{{ row.rotation_degrees_x }}</td>
-                        <td>{{ row.rotation_degrees_y }}</td>
-                        <td>{{ row.rotation_degrees_z }}</td>
-                        <td>{{ row.gx }}</td>
-                        <td>{{ row.gy }}</td>
-                        <td>{{ row.gz }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-        
-        <script>
-            // Dane do wykresów temperatury i ciśnienia
-            const timestamps = {{ measurements | map(attribute='timestamp') | list | tojson }};
-            const temperatures = {{ measurements | map(attribute='temperature') | list | tojson }};
-            const pressures = {{ measurements | map(attribute='pressure') | list | tojson }};
+            <!-- Rząd 2: Obrót i Przyspieszenie -->
+            <div class="plot-row">
+                <div id="rotation-plot" class="plot-container"></div>
+                <div id="acceleration-plot" class="plot-container"></div>
+            </div>
+            <h2>Dane Pomiarowe</h2>
+            <div class="scrollable-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Timestamp</th>
+                            <th>Temperatura (°C)</th>
+                            <th>Ciśnienie (hPa)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in measurements %}
+                        <tr>
+                            <td>{{ row.timestamp }}</td>
+                            <td>{{ row.temperature }}</td>
+                            <td>{{ row.pressure }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
 
-            // Dane do wykresów obrotu i przyspieszenia
-            const rotationTimestamps = {{ rotation_data | map(attribute='timestamp') | list | tojson }};
-            const rotations_x = {{ rotation_data | map(attribute='rotation_degrees_x') | list | tojson }};
-            const rotations_y = {{ rotation_data | map(attribute='rotation_degrees_y') | list | tojson }};
-            const rotations_z = {{ rotation_data | map(attribute='rotation_degrees_z') | list | tojson }};
-            const gx = {{ rotation_data | map(attribute='gx') | list | tojson }};
-            const gy = {{ rotation_data | map(attribute='gy') | list | tojson }};
-            const gz = {{ rotation_data | map(attribute='gz') | list | tojson }};
+            <h2>Wykrycie Ognia</h2>
+            <div class="scrollable-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Timestamp</th>
+                            <th>Wykryto Ogień</th>
+                            <th>Wartość Czujnika</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in fire_data if row.fire_detected %}
+                        <tr>
+                            <td>{{ row.timestamp }}</td>
+                            <td class="fire-detected">Tak</td>
+                            <td>{{ row.sensor_value }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
 
-            // Wykres temperatury
-            Plotly.newPlot('temperature-plot', [{
-                x: timestamps,
-                y: temperatures,
-                type: 'scatter',
-                mode: 'lines+markers',
-                name: 'Temperatura',
-                line: { color: 'red' }
-            }], {
-                title: 'Temperatura w czasie',
-                xaxis: { title: 'Czas' },
-                yaxis: { title: 'Temperatura (°C)' }
-            });
+            <h2>Obrót i Przyspieszenie</h2>
+            <div class="scrollable-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Timestamp</th>
+                            <th>Obrót (°) w x</th>
+                            <th>Obrót (°) w y</th>
+                            <th>Obrót (°) w z</th>
+                            <th>GX</th>
+                            <th>GY</th>
+                            <th>GZ</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in rotation_data %}
+                        <tr>
+                            <td>{{ row.timestamp }}</td>
+                            <td>{{ row.rotation_degrees_x }}</td>
+                            <td>{{ row.rotation_degrees_y }}</td>
+                            <td>{{ row.rotation_degrees_z }}</td>
+                            <td>{{ row.gx }}</td>
+                            <td>{{ row.gy }}</td>
+                            <td>{{ row.gz }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            
+            <script>
+                // Dane do wykresów temperatury i ciśnienia
+                const timestamps = {{ measurements | map(attribute='timestamp') | list | tojson }};
+                const temperatures = {{ measurements | map(attribute='temperature') | list | tojson }};
+                const pressures = {{ measurements | map(attribute='pressure') | list | tojson }};
 
-            // Wykres ciśnienia
-            Plotly.newPlot('pressure-plot', [{
-                x: timestamps,
-                y: pressures,
-                type: 'scatter',
-                mode: 'lines+markers',
-                name: 'Ciśnienie',
-                line: { color: 'blue' }
-            }], {
-                title: 'Ciśnienie w czasie',
-                xaxis: { title: 'Czas' },
-                yaxis: { title: 'Ciśnienie (hPa)' }
-            });
+                // Dane do wykresów obrotu i przyspieszenia
+                const rotationTimestamps = {{ rotation_data | map(attribute='timestamp') | list | tojson }};
+                const rotations_x = {{ rotation_data | map(attribute='rotation_degrees_x') | list | tojson }};
+                const rotations_y = {{ rotation_data | map(attribute='rotation_degrees_y') | list | tojson }};
+                const rotations_z = {{ rotation_data | map(attribute='rotation_degrees_z') | list | tojson }};
+                const gx = {{ rotation_data | map(attribute='gx') | list | tojson }};
+                const gy = {{ rotation_data | map(attribute='gy') | list | tojson }};
+                const gz = {{ rotation_data | map(attribute='gz') | list | tojson }};
 
-            // Wykres stopni obrotu
-            Plotly.newPlot('rotation-plot', [
-                {
-                    x: rotationTimestamps,
-                    y: rotations_x,
+                // Wykres temperatury
+                Plotly.newPlot('temperature-plot', [{
+                    x: timestamps,
+                    y: temperatures,
                     type: 'scatter',
                     mode: 'lines+markers',
-                    name: 'Obrót x',
-                    line: { color: 'purple' }
-            },
-            {
-                x: rotationTimestamps,
-                y: rotations_y,
-                type: 'scatter',
-                mode: 'lines+markers',
-                name: 'Obrót y',
-                line: { color: 'orange' }
-            },
-            {
-                x: rotationTimestamps,
-                y: rotations_z,
-                type: 'scatter',
-                mode: 'lines+markers',
-                name: 'Obrót z',
-                line: { color: 'brown' }
-            }
-        ], {
-                title: 'Stopnie obrotu w 3 kierunkach w czasie',
-                xaxis: { title: 'Czas' },
-                yaxis: { title: 'Obrót (°)' }
-            });
+                    name: 'Temperatura',
+                    line: { color: 'red' }
+                }], {
+                    title: 'Temperatura w czasie',
+                    xaxis: { title: 'Czas' },
+                    yaxis: { title: 'Temperatura (°C)' }
+                });
 
-            // Wykres przyspieszenia
-            Plotly.newPlot('acceleration-plot', [
-                {
-                    x: rotationTimestamps,
-                    y: gx,
+                // Wykres ciśnienia
+                Plotly.newPlot('pressure-plot', [{
+                    x: timestamps,
+                    y: pressures,
                     type: 'scatter',
                     mode: 'lines+markers',
-                    name: 'GX',
-                    line: { color: 'purple' }
+                    name: 'Ciśnienie',
+                    line: { color: 'blue' }
+                }], {
+                    title: 'Ciśnienie w czasie',
+                    xaxis: { title: 'Czas' },
+                    yaxis: { title: 'Ciśnienie (hPa)' }
+                });
+
+                // Wykres stopni obrotu
+                Plotly.newPlot('rotation-plot', [
+                    {
+                        x: rotationTimestamps,
+                        y: rotations_x,
+                        type: 'scatter',
+                        mode: 'lines+markers',
+                        name: 'Obrót x',
+                        line: { color: 'purple' }
                 },
                 {
                     x: rotationTimestamps,
-                    y: gy,
+                    y: rotations_y,
                     type: 'scatter',
                     mode: 'lines+markers',
-                    name: 'GY',
+                    name: 'Obrót y',
                     line: { color: 'orange' }
                 },
                 {
                     x: rotationTimestamps,
-                    y: gz,
+                    y: rotations_z,
                     type: 'scatter',
                     mode: 'lines+markers',
-                    name: 'GZ',
+                    name: 'Obrót z',
                     line: { color: 'brown' }
                 }
             ], {
-                title: 'Przyspieszenie w 3 kierunkach w czasie',
-                xaxis: { title: 'Czas' },
-                yaxis: { title: 'Przyspieszenie (m/s²)' }
-            });
-        </script>
+                    title: 'Stopnie obrotu w 3 kierunkach w czasie',
+                    xaxis: { title: 'Czas' },
+                    yaxis: { title: 'Obrót (°)' }
+                });
+
+                // Wykres przyspieszenia
+                Plotly.newPlot('acceleration-plot', [
+                    {
+                        x: rotationTimestamps,
+                        y: gx,
+                        type: 'scatter',
+                        mode: 'lines+markers',
+                        name: 'GX',
+                        line: { color: 'purple' }
+                    },
+                    {
+                        x: rotationTimestamps,
+                        y: gy,
+                        type: 'scatter',
+                        mode: 'lines+markers',
+                        name: 'GY',
+                        line: { color: 'orange' }
+                    },
+                    {
+                        x: rotationTimestamps,
+                        y: gz,
+                        type: 'scatter',
+                        mode: 'lines+markers',
+                        name: 'GZ',
+                        line: { color: 'brown' }
+                    }
+                ], {
+                    title: 'Przyspieszenie w 3 kierunkach w czasie',
+                    xaxis: { title: 'Czas' },
+                    yaxis: { title: 'Przyspieszenie (m/s²)' }
+                });
+            </script>
     </div>
 </body>
 </html>

@@ -120,42 +120,45 @@
     </style>
 </head>
 <body>
-    <div class="sidebar">
-        <div>
-            <a href="{{ url_for('home.home') }}">Strona Główna</a>
-            <a href="{{ url_for('current_journey.current_journey')}}">Aktualna Podróż</a>
-            <a href="{{ url_for('new_journey.new_journey') }}">Nowa Podróż</a>
-            <a href="{{ url_for('journey_history.journey_history') }}">Historia Podróży</a>
+    {% if username %}
+        <div class="sidebar">
+            <div>
+                <a href="{{ url_for('home.home') }}">Strona Główna</a>
+                <a href="{{ url_for('boards.boards', username=username) }}">Twoje Urządzenia</a>
+                <a href="{{ url_for('current_journey.current_journey')}}">Aktualna Podróż</a>
+                <a href="{{ url_for('new_journey.new_journey') }}">Nowa Podróż</a>
+                <a href="{{ url_for('journey_history.journey_history') }}">Historia Podróży</a>
+            </div>
+            <a href="{{ url_for('login.logout') }}">Wyloguj</a>
         </div>
-        <a href="{{ url_for('login.logout') }}">Wyloguj</a>
-    </div>
-    
-    <div class="content">
-        <h1>Historia Podróży</h1>
         
-        <table class="journey-list">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Nazwa</th>
-                    <th>Data Rozpoczęcia</th>
-                    <th>Data Zakończenia</th>
-                    <th>Szczegóły</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for journey in journeys %}
-                <tr>
-                    <td>{{ journey.id }}</td>
-                    <td>{{ journey.name }}</td>
-                    <td>{{ journey.start_time }}</td>
-                    <td>{{ journey.end_time or 'W trakcie' }}</td>
-                    <td><a class="journey-link" href="/journey_details/{{ journey.id }}">Zobacz</a></td>
-                    
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
+        <div class="content">
+            <h1>Historia Podróży</h1>
+            
+            <table class="journey-list">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Nazwa</th>
+                        <th>Data Rozpoczęcia</th>
+                        <th>Data Zakończenia</th>
+                        <th>Szczegóły</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for journey in journeys %}
+                    <tr>
+                        <td>{{ journey.id }}</td>
+                        <td>{{ journey.name }}</td>
+                        <td>{{ journey.start_time }}</td>
+                        <td>{{ journey.end_time or 'W trakcie' }}</td>
+                        <td><a class="journey-link" href="/journey_details/{{ journey.id }}">Zobacz</a></td>
+                        
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% endif %}
 </body>
 </html>

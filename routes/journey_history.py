@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, jsonify, request
+from flask import Blueprint, render_template, jsonify, request, session
 import sqlite3
 
 bp = Blueprint('journey_history', __name__)
@@ -14,5 +14,6 @@ def get_all_journeys():
 
 @bp.route('/journey_history', methods=['GET'])
 def journey_history():
+    username = session.get('username')
     journeys = get_all_journeys()
-    return render_template('journey_history.html', journeys=journeys)
+    return render_template('journey_history.html', journeys=journeys, username=username)

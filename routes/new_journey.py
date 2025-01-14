@@ -120,11 +120,12 @@ from time import sleep as Sleep
 bp = Blueprint('new_journey', __name__)
 
 # Konfiguracja MQTT
-mqtt_broker = "192.168.1.15"  # Adres brokera MQTT
+mqtt_broker = "192.168.137.168"  # Adres brokera MQTT
 mqtt_port = 1883
 
 @bp.route('/new_journey', methods=['GET', 'POST'])
 def new_journey():
+    username = session.get('username')
     if request.method == 'GET':
         username = session.get('username')  # Pobierz aktualnie zalogowanego użytkownika
         if not username:
@@ -135,18 +136,18 @@ def new_journey():
 
         # Pobierz ID użytkownika na podstawie nazwy użytkownika
         c.execute("SELECT id FROM users WHERE username = ?", (username,))
-        user_id = c.fetchone()
+        user_id_row = c.fetchone()
 
-        if user_id:
-            user_id = user_id[0]
-            # Pobierz wszystkie adresy MAC powiązane z użytkownikiem
-            c.execute("SELECT mac_address FROM user_boards WHERE user_id = ?", (user_id,))
-            user_macs = [row[0] for row in c.fetchall()]
-        else:
-            user_macs = []
+        boards = []
+        if user_id_row:
+            user_id = user_id_row[0]
+            # Pobierz adresy MAC oraz nazwy płyt powiązane z użytkownikiem
+            c.execute("SELECT mac_address, board_name FROM user_boards WHERE user_id = ?", (user_id,))
+            boards = [{'mac_address': row[0], 'board_name': row[1]} for row in c.fetchall()]
 
         conn.close()
-        return render_template('new_journey.html', mac_addresses=user_macs)
+        # Przekazujemy listę płyt do szablonu jako 'boards'
+        return render_template('new_journey.html', username=username, boards=boards)
 
     if request.method == 'POST':
         username = session.get('username')
@@ -211,10 +212,12 @@ def new_journey():
                 except Exception as e:
                     print(f"Błąd podczas przetwarzania wiadomości: {e}")
 
-            return redirect(url_for('home.home'))  # Przekierowanie po przetworzeniu danych
+            return redirect(url_for('home.home'))  # Przekierowanie po przetwarzzeniu danych
 
         except Exception as e:
             print(f"Error: {e}")
             return jsonify({'message': 'Wystąpił błąd podczas wysyłania danych przez MQTT.'}), 500
 
-    return render_template('new_journey.html')
+    # Domyślny zwrot, chociaż nie powinien tu dojść
+    return render_template('new_journey.html',username=username, boards=boards)
+

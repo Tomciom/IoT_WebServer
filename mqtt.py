@@ -6,7 +6,7 @@ import requests, json
 
 
 # MQTT settings
-BROKER_ADDRESS = "192.168.1.15"
+BROKER_ADDRESS = "192.168.137.168"
 BROKER_PORT = 1883
 TOPIC_RECEIVE = "BlackBox/+/+/Pin"
 TOPIC_RESPONSE_TEMPLATE = "BlackBox/{username}/{mac}/Response"

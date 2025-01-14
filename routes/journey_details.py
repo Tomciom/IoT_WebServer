@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template
+from flask import Blueprint, render_template, session
 import sqlite3
 
 bp = Blueprint('journey_details', __name__)
@@ -25,9 +25,11 @@ def get_journey_data(journey_id):
 
 @bp.route('/journey_details/<int:journey_id>', methods=['GET'])
 def journey_details(journey_id):
+    username = session.get('username')
     measurements, fire_data, rotation_data = get_journey_data(journey_id)
     return render_template('journey_details.html', 
                            journey_id=journey_id, 
                            measurements=measurements, 
                            fire_data=fire_data, 
-                           rotation_data=rotation_data)
+                           rotation_data=rotation_data,
+                           username=username)

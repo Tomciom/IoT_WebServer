@@ -135,4 +135,4 @@ if __name__ == '__main__':
     init_db()
     create_journeys()
     app = create_app()
-    app.run(host='192.168.1.15', port=5000,debug=config.Config.DEBUG)
+    app.run(host='192.168.137.168', port=5000,debug=config.Config.DEBUG)

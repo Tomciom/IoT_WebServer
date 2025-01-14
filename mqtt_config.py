@@ -6,7 +6,7 @@ import threading
 import datetime  # Dodano import dla konwersji daty
 
 # Ustawienia MQTT
-BROKER_ADDRESS = "192.168.1.15"
+BROKER_ADDRESS = "192.168.137.168"
 BROKER_PORT = 1883
 
 # Tematy
@@ -133,6 +133,17 @@ def handle_stop():
     elif ky026_data:
         mac = ky026_data[0].get('mac_address')
 
+    if mac:
+        try:
+            conn_users = sqlite3.connect('Users.db')
+            c = conn_users.cursor()
+            c.execute("UPDATE user_boards SET is_in_use = 0 WHERE mac_address = ?", (mac,))
+            conn_users.commit()
+            conn_users.close()
+            print(f"Zaktualizowano is_in_use dla {mac} w bazie Users.db.")
+        except Exception as e:
+            print("Błąd podczas aktualizacji Users.db:", e)
+
     # Inicjalizacja journey_id
     journey_id = None
 
@@ -198,6 +209,8 @@ def on_message(client, userdata, msg):
                 client.subscribe(topic, qos)
         elif payload == "0":
             print("Otrzymano sygnał STOP. Kończę odbiór danych.")
+            # Aktualizacja is_in_use w Users.db
+
             handle_stop()
         return
 
@@ -212,23 +225,33 @@ def on_message(client, userdata, msg):
 
         # Wyciąganie typu sensora i adresu MAC z tematu
         sensor_type = topic_parts[-1]
-        # Adres MAC znajduje się w trzecim elemencie tematu (indeks 2)
         mac_address = topic_parts[2]
         data['mac_address'] = mac_address
 
         # Konwersja timestampu z Unix na ISO format, jeśli obecny
         if 'timestamp' in data:
             try:
-                # Konwersja z Unix timestamp na czytelną datę
                 data['timestamp'] = datetime.datetime.fromtimestamp(
                     float(data['timestamp'])
                 ).isoformat(' ')
             except Exception as e:
                 print("Błąd konwersji timestampu:", e)
 
-        # Dodawanie danych do odpowiednich tablic
+        # Zamiana wartości obrotu i przyspieszenia dla MPU6050
         if sensor_type == "mpu6050":
+            # Przykładowa zamiana - dostosuj nazwy pól do formatu twoich danych!
+            # Zakładamy, że pola rotacji to: rotation_degrees_x, rotation_degrees_y, rotation_degrees_z
+            # oraz pola przyspieszenia to: gx, gy, gz
+            try:
+                # Zamiana wartości między polami obrotu a przyspieszeniem
+                data['rotation_degrees_x'], data['gx'] = data.get('gx', 0), data.get('rotation_degrees_x', 0)
+                data['rotation_degrees_y'], data['gy'] = data.get('gy', 0), data.get('rotation_degrees_y', 0)
+                data['rotation_degrees_z'], data['gz'] = data.get('gz', 0), data.get('rotation_degrees_z', 0)
+            except KeyError as e:
+                print(f"Nie znaleziono oczekiwanego pola: {e}")
+
             mpu6050_data.append(data)
+
         elif sensor_type == "bmp280":
             bmp280_data.append(data)
         elif sensor_type == "ky026":

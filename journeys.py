@@ -1,7 +1,7 @@
 import sqlite3
 import time
 import random
-from datetime import datetime, timedelta
+from datetime import datetime
 
 # Tworzenie bazy danych i tabel
 def create_database():
@@ -15,7 +15,8 @@ def create_database():
             name TEXT NOT NULL,
             start_time TIMESTAMP NOT NULL,
             end_time TIMESTAMP,
-            is_current BOOLEAN DEFAULT 0
+            is_current BOOLEAN DEFAULT 0,
+            mac_address TEXT
         )
     ''')
 
@@ -27,6 +28,7 @@ def create_database():
             timestamp TIMESTAMP NOT NULL,
             temperature REAL NOT NULL,
             pressure REAL NOT NULL,
+            mac_address TEXT,
             FOREIGN KEY (journey_id) REFERENCES journeys (id)
         )
     ''')
@@ -39,6 +41,7 @@ def create_database():
             timestamp TIMESTAMP NOT NULL,
             fire_detected INTEGER NOT NULL,
             sensor_value REAL NOT NULL,
+            mac_address TEXT,
             FOREIGN KEY (journey_id) REFERENCES journeys (id)
         )
     ''')
@@ -55,6 +58,7 @@ def create_database():
             gx REAL NOT NULL,
             gy REAL NOT NULL,
             gz REAL NOT NULL,
+            mac_address TEXT,
             FOREIGN KEY (journey_id) REFERENCES journeys (id)
         )
     ''')
@@ -63,14 +67,14 @@ def create_database():
     conn.close()
 
 # Dodawanie nowej podróży
-def add_new_journey(journey_name):
+def add_new_journey(journey_name, mac_address):
     conn = sqlite3.connect('journeys.db')
     c = conn.cursor()
     start_time = datetime.now()
     c.execute('''
-        INSERT INTO journeys (name, start_time, is_current)
-        VALUES (?, ?, 1)
-    ''', (journey_name, start_time))
+        INSERT INTO journeys (name, start_time, is_current, mac_address)
+        VALUES (?, ?, 1, ?)
+    ''', (journey_name, start_time, mac_address))
     conn.commit()
     journey_id = c.lastrowid
     conn.close()
@@ -90,7 +94,7 @@ def end_journey(journey_id):
     conn.close()
 
 # Generowanie danych pomiarowych
-def generate_data(journey_id):
+def generate_data(journey_id, mac_address):
     conn = sqlite3.connect('journeys.db')
     c = conn.cursor()
 
@@ -109,19 +113,19 @@ def generate_data(journey_id):
 
     # Wstawianie do tabel
     c.execute('''
-        INSERT INTO temperature_pressure (journey_id, timestamp, temperature, pressure)
-        VALUES (?, ?, ?, ?)
-    ''', (journey_id, timestamp, temperature, pressure))
+        INSERT INTO temperature_pressure (journey_id, timestamp, temperature, pressure, mac_address)
+        VALUES (?, ?, ?, ?, ?)
+    ''', (journey_id, timestamp, temperature, pressure, mac_address))
 
     c.execute('''
-        INSERT INTO fire_detection (journey_id, timestamp, fire_detected, sensor_value)
-        VALUES (?, ?, ?, ?)
-    ''', (journey_id, timestamp, fire_detected, sensor_value))
+        INSERT INTO fire_detection (journey_id, timestamp, fire_detected, sensor_value, mac_address)
+        VALUES (?, ?, ?, ?, ?)
+    ''', (journey_id, timestamp, fire_detected, sensor_value, mac_address))
 
     c.execute('''
-        INSERT INTO rotation_acceleration (journey_id, timestamp, rotation_degrees_x, rotation_degrees_y, rotation_degrees_z, gx, gy, gz)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-    ''', (journey_id, timestamp, rotation_degrees_x, rotation_degrees_y, rotation_degrees_z, gx, gy, gz))
+        INSERT INTO rotation_acceleration (journey_id, timestamp, rotation_degrees_x, rotation_degrees_y, rotation_degrees_z, gx, gy, gz, mac_address)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    ''', (journey_id, timestamp, rotation_degrees_x, rotation_degrees_y, rotation_degrees_z, gx, gy, gz, mac_address))
 
     conn.commit()
     conn.close()
@@ -129,12 +133,13 @@ def generate_data(journey_id):
 # Główna funkcja
 if __name__ == '__main__':
     create_database()
-    journey_id = add_new_journey("Podróż Testowa")
+    mac_address = "98:3D:AE:EB:38:C4"  # Example MAC address
+    journey_id = add_new_journey("Podróż Testowa", mac_address)
 
     try:
         while True:
-            generate_data(journey_id)
-            print(f"Dodano nowe dane dla podróży ID {journey_id}.")
+            generate_data(journey_id, mac_address)
+            print(f"Dodano nowe dane dla podróży ID {journey_id} (MAC: {mac_address}).")
             time.sleep(1)  # Czas między odczytami (w sekundach)
     except KeyboardInterrupt:
         print("Kończenie podróży...")

@@ -93,18 +93,75 @@ def init_db():
 
     conn.close()
 
-def save_mac_to_db(mac_address):
-    conn = sqlite3.connect('Users.db')
-    c = conn.cursor()
-    c.execute("INSERT INTO user_boards (user_id, mac_address) VALUES (?, ?)", (1, mac_address))
-    conn.commit()
-    conn.close()
+def save_mac_to_db(username, mac_address):
+    # Połącz się z bazą Users.db w celu aktualizacji tabeli user_boards
+    conn_users = sqlite3.connect('Users.db')
+    cur_users = conn_users.cursor()
+
+    # Uzyskaj user_id na podstawie username
+    cur_users.execute("SELECT id FROM users WHERE username = ?", (username,))
+    result = cur_users.fetchone()
+    if result is None:
+        conn_users.close()
+        raise ValueError(f"User with username '{username}' not found.")
+    user_id = result[0]
+
+    # Usuń istniejące wpisy dla danego user_id i mac_address
+    cur_users.execute(
+        "DELETE FROM user_boards WHERE mac_address = ?",
+        (mac_address,)
+    )
+    conn_users.commit()
+    
+    # Wstaw nowy wpis dla danej płytki i użytkownika
+    cur_users.execute(
+        "INSERT INTO user_boards (user_id, mac_address) VALUES (?, ?)",
+        (user_id, mac_address)
+    )
+    conn_users.commit()
+    conn_users.close()
+
+    # Połącz się z bazą journeys.db w celu usunięcia powiązanych podróży i rekordów
+    conn_journeys = sqlite3.connect('journeys.db')
+    cur_journeys = conn_journeys.cursor()
+    
+    # Pobierz identyfikatory podróży związanych z daną płytką
+    cur_journeys.execute(
+        "SELECT id FROM journeys WHERE mac_address = ?",
+        (mac_address,)
+    )
+    journey_ids = cur_journeys.fetchall()
+    
+    # Dla każdej znalezionej podróży usuń powiązane rekordy z tabel pomocniczych
+    for (journey_id,) in journey_ids:
+        cur_journeys.execute(
+            "DELETE FROM temperature_pressure WHERE journey_id = ?",
+            (journey_id,)
+        )
+        cur_journeys.execute(
+            "DELETE FROM fire_detection WHERE journey_id = ?",
+            (journey_id,)
+        )
+        cur_journeys.execute(
+            "DELETE FROM rotation_acceleration WHERE journey_id = ?",
+            (journey_id,)
+        )
+    
+    # Usuń same podróże powiązane z daną płytką
+    cur_journeys.execute(
+        "DELETE FROM journeys WHERE mac_address = ?",
+        (mac_address,)
+    )
+    conn_journeys.commit()
+    conn_journeys.close()
+
+
 
 def send_mac():
     try:
         received_data = request.json
         print("Received data:", received_data)
-        save_mac_to_db(received_data['mac_address'])
+        save_mac_to_db(received_data['username'], received_data['mac_address'])
         response = {"response": f"Data received: {received_data['mac_address']}"}
         return jsonify(response), 200
     except Exception as e:
@@ -135,4 +192,4 @@ if __name__ == '__main__':
     init_db()
     create_journeys()
     app = create_app()
-    app.run(host='192.168.137.168', port=5000,debug=config.Config.DEBUG)
+    app.run(host=config.mqtt_broker, port=5000,debug=config.Config.DEBUG)

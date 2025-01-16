@@ -1,5 +1,6 @@
-from flask import Blueprint, render_template, session
+from flask import Blueprint, render_template, session, Response
 import sqlite3
+import csv, io
 
 bp = Blueprint('journey_details', __name__)
 
@@ -33,3 +34,49 @@ def journey_details(journey_id):
                            fire_data=fire_data, 
                            rotation_data=rotation_data,
                            username=username)
+
+
+@bp.route('/journey_details/<int:journey_id>/download_csv')
+def download_csv(journey_id):
+    measurements, fire_data, rotation_data = get_journey_data(journey_id)
+    
+    output = io.StringIO()
+    writer = csv.writer(output)
+
+    # Sekcja: Pomiary
+    writer.writerow(['Pomiary'])
+    writer.writerow(['Timestamp', 'Temperatura (°C)', 'Ciśnienie (hPa)'])
+    for row in measurements:
+        writer.writerow([row['timestamp'], row['temperature'], row['pressure']])
+    writer.writerow([])
+
+    # Sekcja: Wykrycie ognia
+    writer.writerow(['Wykrycie ognia'])
+    writer.writerow(['Timestamp', 'Wykryto ogień', 'Wartość czujnika'])
+    for row in fire_data:
+        writer.writerow([row['timestamp'], row['fire_detected'], row['sensor_value']])
+    writer.writerow([])
+
+    # Sekcja: Obrót i przyspieszenie
+    writer.writerow(['Obrót i przyspieszenie'])
+    writer.writerow(['Timestamp', 'Obrót_x (°)', 'Obrót_y (°)', 'Obrót_z (°)', 'GX', 'GY', 'GZ'])
+    for row in rotation_data:
+        writer.writerow([
+            row['timestamp'], 
+            row['rotation_degrees_x'], 
+            row['rotation_degrees_y'], 
+            row['rotation_degrees_z'], 
+            row['gx'], 
+            row['gy'], 
+            row['gz']
+        ])
+
+    output.seek(0)
+    csv_output = output.getvalue()
+    output.close()
+
+    return Response(
+        csv_output,
+        mimetype="text/csv",
+        headers={"Content-Disposition": f"attachment; filename=journey_{journey_id}.csv"}
+    )

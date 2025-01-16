@@ -67,6 +67,14 @@ def toggle_board_usage(board_id, in_use):
 def boards(username):
     if 'username' not in session or session['username'] != username:
         return redirect(url_for('home.home'))
+    
+    if request.method == 'POST':
+        # Obsługa przycisku "Resetuj"
+        if 'reset' in request.form:
+            board_id = request.form.get('board_id')
+            if board_id:
+                toggle_board_usage(board_id, 0)  # Ustawia is_in_use na 0
+            return redirect(url_for('boards.boards', username=username))
 
     if request.method == 'POST':
         # Obsługa przycisku "Usuń"

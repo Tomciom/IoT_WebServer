@@ -192,6 +192,10 @@
         <div class="content">
             <h1>Szczegóły Podróży #{{ journey_id }}</h1>
 
+            <a href="{{ url_for('journey_details.download_csv', journey_id=journey_id) }}">
+                <button>Zapisz jako CSV</button>
+            </a>
+            
             <h2>Wykresy</h2>
             <!-- Rząd 1: Temperatura i Ciśnienie -->
             <div class="plot-row">

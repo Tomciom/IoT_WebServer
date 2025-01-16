@@ -2,11 +2,11 @@ import paho.mqtt.client as mqtt
 import sqlite3
 import json
 import time
-import threading
+import threading, config
 import datetime  # Dodano import dla konwersji daty
 
 # Ustawienia MQTT
-BROKER_ADDRESS = "192.168.137.168"
+BROKER_ADDRESS = config.mqtt_broker
 BROKER_PORT = 1883
 
 # Tematy

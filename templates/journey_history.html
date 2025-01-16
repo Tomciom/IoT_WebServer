@@ -139,7 +139,7 @@
                 <thead>
                     <tr>
                         <th>ID</th>
-                        <th>Nazwa</th>
+                        <th>Nazwa Płytki</th>
                         <th>Data Rozpoczęcia</th>
                         <th>Data Zakończenia</th>
                         <th>Szczegóły</th>
@@ -149,7 +149,7 @@
                     {% for journey in journeys %}
                     <tr>
                         <td>{{ journey.id }}</td>
-                        <td>{{ journey.name }}</td>
+                        <td>{{ journey.board_name }}</td>
                         <td>{{ journey.start_time }}</td>
                         <td>{{ journey.end_time or 'W trakcie' }}</td>
                         <td><a class="journey-link" href="/journey_details/{{ journey.id }}">Zobacz</a></td>

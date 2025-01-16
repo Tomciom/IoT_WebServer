@@ -1,12 +1,12 @@
 import paho.mqtt.client as mqtt
 import routes.home as home
 import routes.new_journey as new_journey
-import requests, json
+import requests, json, config
 
 
 
 # MQTT settings
-BROKER_ADDRESS = "192.168.137.168"
+BROKER_ADDRESS = config.mqtt_broker
 BROKER_PORT = 1883
 TOPIC_RECEIVE = "BlackBox/+/+/Pin"
 TOPIC_RESPONSE_TEMPLATE = "BlackBox/{username}/{mac}/Response"
@@ -56,7 +56,7 @@ def on_message(client, userdata, msg):
             response_esp = "1"
         
             # Send response via HTTP POST
-            post_response = requests.post('http://192.168.1.15:5000/send_mac', json=response)
+            post_response = requests.post(('http://' + BROKER_ADDRESS + ':5000/send_mac'), json=response)
             print(f"Sent POST response: {post_response.status_code}")
         else:
             print("Username or PIN did not match. No POST request sent.")

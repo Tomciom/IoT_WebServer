@@ -106,6 +106,15 @@
         form {
             display: inline;
         }
+
+        button.reset {
+            background-color: #28a745; /* Zielony kolor dla Resetuj */
+        }
+
+        button.reset:hover {
+            background-color: #1e7e34;
+        }
+
     </style>
 </head>
 <body>
@@ -148,6 +157,10 @@
                             {{ 'Tak' if board.is_in_use else 'Nie' }}
                         </td>
                         <td>
+                            <form method="post" action="{{ url_for('boards.boards', username=username) }}">
+                                <input type="hidden" name="board_id" value="{{ board.id }}">
+                                <button type="submit" name="reset" class="reset">Resetuj</button>
+                            </form>
                             <form method="post" action="{{ url_for('boards.boards', username=username) }}">
                                 <input type="hidden" name="board_id" value="{{ board.id }}">
                                 <input type="hidden" name="mac_address" value="{{ board.mac_address }}">

@@ -182,7 +182,7 @@
             <div>
                 <a href="{{ url_for('home.home') }}">Strona Główna</a>
                 <a href="{{ url_for('boards.boards', username=username) }}">Twoje Urządzenia</a>
-                <a href="{{ url_for('current_journey.current_journey')}}">Aktualna Podróż</a>
+                <a href="{{ url_for('current_journey.current_journey')}}">Ostatnia Podróż</a>
                 <a href="{{ url_for('new_journey.new_journey') }}">Nowa Podróż</a>
                 <a href="{{ url_for('journey_history.journey_history') }}">Historia Podróży</a>
             </div>
@@ -195,7 +195,7 @@
             <a href="{{ url_for('journey_details.download_csv', journey_id=journey_id) }}">
                 <button>Zapisz jako CSV</button>
             </a>
-            
+
             <h2>Wykresy</h2>
             <!-- Rząd 1: Temperatura i Ciśnienie -->
             <div class="plot-row">

@@ -51,15 +51,15 @@ def download_csv(journey_id):
     writer.writerow([])
 
     # Sekcja: Wykrycie ognia
-    writer.writerow(['Wykrycie ognia'])
-    writer.writerow(['Timestamp', 'Wykryto ogień', 'Wartość czujnika'])
+    writer.writerow(['Wykrycie światła'])
+    writer.writerow(['Timestamp', 'Wykryto światło', 'Wartość czujnika'])
     for row in fire_data:
         writer.writerow([row['timestamp'], row['fire_detected'], row['sensor_value']])
     writer.writerow([])
 
     # Sekcja: Obrót i przyspieszenie
-    writer.writerow(['Obrót i przyspieszenie'])
-    writer.writerow(['Timestamp', 'Obrót_x (°)', 'Obrót_y (°)', 'Obrót_z (°)', 'GX', 'GY', 'GZ'])
+    writer.writerow(['Prędkość kątowa i Przyspieszenie'])
+    writer.writerow(['Timestamp', 'Prędkość w x (°/s)', 'Prędkość w y (°/s)', 'Prędkość w z (°/s)', 'GX', 'GY', 'GZ'])
     for row in rotation_data:
         writer.writerow([
             row['timestamp'], 

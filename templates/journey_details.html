@@ -230,13 +230,13 @@
                 </table>
             </div>
 
-            <h2>Wykrycie Ognia</h2>
+            <h2>Wykrycie Światła</h2>
             <div class="scrollable-table">
                 <table>
                     <thead>
                         <tr>
                             <th>Timestamp</th>
-                            <th>Wykryto Ogień</th>
+                            <th>Wykryto Światło</th>
                             <th>Wartość Czujnika</th>
                         </tr>
                     </thead>
@@ -252,15 +252,15 @@
                 </table>
             </div>
 
-            <h2>Obrót i Przyspieszenie</h2>
+            <h2>Prędkość kątowa i Przyspieszenie</h2>
             <div class="scrollable-table">
                 <table>
                     <thead>
                         <tr>
                             <th>Timestamp</th>
-                            <th>Obrót (°) w x</th>
-                            <th>Obrót (°) w y</th>
-                            <th>Obrót (°) w z</th>
+                            <th>Prędkość w x (°/s)</th>
+                            <th>Prędkość w y (°/s)</th>
+                            <th>Prędkość w z (°/s)</th>
                             <th>GX</th>
                             <th>GY</th>
                             <th>GZ</th>
@@ -332,7 +332,7 @@
                         y: rotations_x,
                         type: 'scatter',
                         mode: 'lines+markers',
-                        name: 'Obrót x',
+                        name: 'Kierunek x',
                         line: { color: 'purple' }
                 },
                 {
@@ -340,7 +340,7 @@
                     y: rotations_y,
                     type: 'scatter',
                     mode: 'lines+markers',
-                    name: 'Obrót y',
+                    name: 'Kierunek y',
                     line: { color: 'orange' }
                 },
                 {
@@ -348,13 +348,13 @@
                     y: rotations_z,
                     type: 'scatter',
                     mode: 'lines+markers',
-                    name: 'Obrót z',
+                    name: 'Kierunek z',
                     line: { color: 'brown' }
                 }
             ], {
-                    title: 'Stopnie obrotu w 3 kierunkach w czasie',
+                    title: 'Prędkość kątowa w 3 kierunkach w czasie',
                     xaxis: { title: 'Czas' },
-                    yaxis: { title: 'Obrót (°)' }
+                    yaxis: { title: 'Prędkość kątowa (°/s)' }
                 });
 
                 // Wykres przyspieszenia

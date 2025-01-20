@@ -7,20 +7,24 @@ bp = Blueprint('register', __name__)
 def register():
     if request.method == 'POST':
         username = request.form['username']
+        
         password = request.form['password']
         confirm_password = request.form['confirm_password']
 
         # Sprawdzenie, czy hasła są zgodne
         if password != confirm_password:
             flash('Hasła nie są zgodne! Spróbuj ponownie.')
-            return redirect(url_for('register'))
-
+            return redirect(url_for('register.register'))
+        try:
         # Zapis do bazy danych
-        conn = sqlite3.connect('Users.db')
-        c = conn.cursor()
-        c.execute("INSERT INTO users (username, password) VALUES (?, ?)", (username, password))
-        conn.commit()
-        conn.close()
+            conn = sqlite3.connect('Users.db')
+            c = conn.cursor()
+            c.execute("INSERT INTO users (username, password) VALUES (?, ?)", (username, password))
+            conn.commit()
+            conn.close()
+        except sqlite3.IntegrityError:
+            flash('Użytkownik o podanej nazwie już istnieje!')
+            return redirect(url_for('register.register'))
 
         flash('Rejestracja zakończona sukcesem!')
         return redirect(url_for('home.home'))

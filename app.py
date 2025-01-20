@@ -75,7 +75,7 @@ def init_db():
     c = conn.cursor()
     c.execute('''CREATE TABLE IF NOT EXISTS users (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    username TEXT NOT NULL,
+                    username TEXT NOT NULL UNIQUE,
                     password TEXT NOT NULL,
                     pin VARCHAR(6))''')
     
@@ -106,6 +106,17 @@ def save_mac_to_db(username, mac_address):
         raise ValueError(f"User with username '{username}' not found.")
     user_id = result[0]
 
+
+    # Sprawdzenie, czy dany adres MAC jest powiązany z innym użytkownikiem
+    cur_users.execute("SELECT user_id FROM user_boards WHERE mac_address = ?", (mac_address,))
+    existing_rows = cur_users.fetchall()
+    remove_journeys = False
+    for (existing_user_id,) in existing_rows:
+        if existing_user_id != user_id:
+            # Znaleziono innego użytkownika przypisanego do tej płytki
+            remove_journeys = True
+            break
+
     # Usuń istniejące wpisy dla danego user_id i mac_address
     cur_users.execute(
         "DELETE FROM user_boards WHERE mac_address = ?",
@@ -121,39 +132,41 @@ def save_mac_to_db(username, mac_address):
     conn_users.commit()
     conn_users.close()
 
-    # Połącz się z bazą journeys.db w celu usunięcia powiązanych podróży i rekordów
-    conn_journeys = sqlite3.connect('journeys.db')
-    cur_journeys = conn_journeys.cursor()
-    
-    # Pobierz identyfikatory podróży związanych z daną płytką
-    cur_journeys.execute(
-        "SELECT id FROM journeys WHERE mac_address = ?",
-        (mac_address,)
-    )
-    journey_ids = cur_journeys.fetchall()
-    
-    # Dla każdej znalezionej podróży usuń powiązane rekordy z tabel pomocniczych
-    for (journey_id,) in journey_ids:
+    # Jeżeli płytka była wcześniej przypisana do innego użytkownika,
+    # usuwamy powiązane podróże i dane.
+    if remove_journeys:
+        conn_journeys = sqlite3.connect('journeys.db')
+        cur_journeys = conn_journeys.cursor()
+        
+        # Pobranie identyfikatorów podróży powiązanych z tą płytką
         cur_journeys.execute(
-            "DELETE FROM temperature_pressure WHERE journey_id = ?",
-            (journey_id,)
+            "SELECT id FROM journeys WHERE mac_address = ?",
+            (mac_address,)
         )
+        journey_ids = cur_journeys.fetchall()
+        
+        # Usunięcie powiązanych rekordów z tabel pomocniczych dla każdej podróży
+        for (journey_id,) in journey_ids:
+            cur_journeys.execute(
+                "DELETE FROM temperature_pressure WHERE journey_id = ?",
+                (journey_id,)
+            )
+            cur_journeys.execute(
+                "DELETE FROM fire_detection WHERE journey_id = ?",
+                (journey_id,)
+            )
+            cur_journeys.execute(
+                "DELETE FROM rotation_acceleration WHERE journey_id = ?",
+                (journey_id,)
+            )
+        
+        # Usunięcie samych podróży powiązanych z tą płytką
         cur_journeys.execute(
-            "DELETE FROM fire_detection WHERE journey_id = ?",
-            (journey_id,)
+            "DELETE FROM journeys WHERE mac_address = ?",
+            (mac_address,)
         )
-        cur_journeys.execute(
-            "DELETE FROM rotation_acceleration WHERE journey_id = ?",
-            (journey_id,)
-        )
-    
-    # Usuń same podróże powiązane z daną płytką
-    cur_journeys.execute(
-        "DELETE FROM journeys WHERE mac_address = ?",
-        (mac_address,)
-    )
-    conn_journeys.commit()
-    conn_journeys.close()
+        conn_journeys.commit()
+        conn_journeys.close()
 
 
 

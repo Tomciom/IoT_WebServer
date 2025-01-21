@@ -33,12 +33,10 @@ def get_board_name(mac_address):
 def get_all_journeys(username):
     user_id = get_user_id(username)
     if not user_id:
-        # Jeżeli użytkownik nie został znaleziony, zwróć pustą listę podróży
         return []
     
     mac_addresses = get_user_mac_addresses(user_id)
     if not mac_addresses:
-        # Jeżeli użytkownik nie ma powiązanych płytek, zwróć pustą listę
         return []
 
     placeholders = ','.join('?' for _ in mac_addresses)
@@ -50,7 +48,7 @@ def get_all_journeys(username):
     """
 
     conn = sqlite3.connect('journeys.db')
-    conn.row_factory = sqlite3.Row  # Umożliwia dostęp do kolumn po nazwie
+    conn.row_factory = sqlite3.Row
     cur = conn.cursor()
     cur.execute(query, mac_addresses)
     journeys_raw = cur.fetchall()
@@ -58,7 +56,6 @@ def get_all_journeys(username):
 
     journeys = []
     for row in journeys_raw:
-        # Dostęp do kolumn po nazwach dzięki row_factory = sqlite3.Row
         journey_id = row['id']
         start_time = row['start_time']
         end_time = row['end_time']

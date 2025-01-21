@@ -10,7 +10,6 @@
 <body>
     <h1>Rejestracja</h1>
 
-    <!-- Wyświetlanie komunikatów błędów -->
     {% with messages = get_flashed_messages() %}
       {% if messages %}
         <ul class="messages">
@@ -19,7 +18,6 @@
       {% endif %}
     {% endwith %}
 
-    <!-- Formularz rejestracji -->
     <form method="POST">
         <input type="text" name="username" placeholder="Nazwa użytkownika"  title="Nazwij się tylko przy użyciu liter i cyfr" pattern="[A-Za-z0-9]+" required><br>
         

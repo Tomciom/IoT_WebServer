@@ -9,7 +9,6 @@ def login():
         username = request.form['username']
         password = request.form['password']
 
-        # Sprawdzenie danych w bazie
         conn = sqlite3.connect('Users.db')
         c = conn.cursor()
         c.execute("SELECT * FROM users WHERE username = ? AND password = ?", (username, password))

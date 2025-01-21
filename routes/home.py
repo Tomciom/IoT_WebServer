@@ -6,20 +6,17 @@ bp = Blueprint('home', __name__)
 def send_code(username):
     conn = sqlite3.connect('Users.db')
     c = conn.cursor()
-    
-    # Wykonaj zapytanie, aby pobrać pin dla danego username
+
     c.execute("SELECT pin FROM users WHERE username = ?", (username,))
-    
-    # Pobierz wynik zapytania
+
     result = c.fetchone()
     
-    # Sprawdź, czy wynik istnieje (czy znaleziono użytkownika)
     if result:
-        pin = result[0]  # przypisanie pierwszego (i jedynego) elementu do zmiennej pin
+        pin = result[0]
         print("Received configuration code:", pin)
     else:
         print("User not found.")
-        pin = None  # przypisanie None, jeśli użytkownik nie istnieje
+        pin = None
     
     conn.close()
     return pin
@@ -30,7 +27,7 @@ def send_code(username):
 def home():
     username = session.get('username')
     if request.method == 'POST':
-        newCode = request.json  # Receive the JSON data
+        newCode = request.json
         try:
             conn = sqlite3.connect('Users.db')
             c = conn.cursor()

@@ -8,7 +8,6 @@ def create_journeys():
     conn = sqlite3.connect('journeys.db')
     c = conn.cursor()
 
-    # Tabela podróży
     c.execute('''
         CREATE TABLE IF NOT EXISTS journeys (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -20,7 +19,6 @@ def create_journeys():
         )
     ''')
 
-    # Tabela temperatury i ciśnienia
     c.execute('''
         CREATE TABLE IF NOT EXISTS temperature_pressure (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -33,7 +31,6 @@ def create_journeys():
         )
     ''')
 
-    # Tabela wykrycia ognia
     c.execute('''
         CREATE TABLE IF NOT EXISTS fire_detection (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -46,7 +43,6 @@ def create_journeys():
         )
     ''')
 
-    # Tabela obrotu i przyspieszenia
     c.execute('''
         CREATE TABLE IF NOT EXISTS rotation_acceleration (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -94,11 +90,9 @@ def init_db():
     conn.close()
 
 def save_mac_to_db(username, mac_address):
-    # Połącz się z bazą Users.db w celu aktualizacji tabeli user_boards
     conn_users = sqlite3.connect('Users.db')
     cur_users = conn_users.cursor()
 
-    # Uzyskaj user_id na podstawie username
     cur_users.execute("SELECT id FROM users WHERE username = ?", (username,))
     result = cur_users.fetchone()
     if result is None:
@@ -107,24 +101,20 @@ def save_mac_to_db(username, mac_address):
     user_id = result[0]
 
 
-    # Sprawdzenie, czy dany adres MAC jest powiązany z innym użytkownikiem
     cur_users.execute("SELECT user_id FROM user_boards WHERE mac_address = ?", (mac_address,))
     existing_rows = cur_users.fetchall()
     remove_journeys = False
     for (existing_user_id,) in existing_rows:
         if existing_user_id != user_id:
-            # Znaleziono innego użytkownika przypisanego do tej płytki
             remove_journeys = True
             break
 
-    # Usuń istniejące wpisy dla danego user_id i mac_address
     cur_users.execute(
         "DELETE FROM user_boards WHERE mac_address = ?",
         (mac_address,)
     )
     conn_users.commit()
-    
-    # Wstaw nowy wpis dla danej płytki i użytkownika
+
     cur_users.execute(
         "INSERT INTO user_boards (user_id, mac_address) VALUES (?, ?)",
         (user_id, mac_address)
@@ -132,20 +122,16 @@ def save_mac_to_db(username, mac_address):
     conn_users.commit()
     conn_users.close()
 
-    # Jeżeli płytka była wcześniej przypisana do innego użytkownika,
-    # usuwamy powiązane podróże i dane.
     if remove_journeys:
         conn_journeys = sqlite3.connect('journeys.db')
         cur_journeys = conn_journeys.cursor()
-        
-        # Pobranie identyfikatorów podróży powiązanych z tą płytką
+
         cur_journeys.execute(
             "SELECT id FROM journeys WHERE mac_address = ?",
             (mac_address,)
         )
         journey_ids = cur_journeys.fetchall()
-        
-        # Usunięcie powiązanych rekordów z tabel pomocniczych dla każdej podróży
+
         for (journey_id,) in journey_ids:
             cur_journeys.execute(
                 "DELETE FROM temperature_pressure WHERE journey_id = ?",
@@ -160,7 +146,6 @@ def save_mac_to_db(username, mac_address):
                 (journey_id,)
             )
         
-        # Usunięcie samych podróży powiązanych z tą płytką
         cur_journeys.execute(
             "DELETE FROM journeys WHERE mac_address = ?",
             (mac_address,)

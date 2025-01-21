@@ -36,7 +36,7 @@
         }
 
         .sidebar {
-            position: fixed; /* Sidebar pozostaje w stałym miejscu podczas przewijania */
+            position: fixed;
             top: 0;
             left: 0;
             width: 200px;
@@ -45,9 +45,9 @@
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-            height: 90vh; /* Pełna wysokość ekranu */
+            height: 90vh;
             box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
-            z-index: 1000; /* Ustawienie nad innymi elementami */
+            z-index: 1000;
             margin: 25px;
         }
 
@@ -69,7 +69,7 @@
             justify-content: center;
             align-items: center;
             width: 85%;
-            margin-left: 220px; /* Odsunięcie treści od sidebaru */
+            margin-left: 220px;
         }
         .code-box {
             text-align: center;
@@ -171,7 +171,7 @@
             border: 1px solid #ddd;
             border-radius: 5px;
             overflow-y: auto;
-            max-height: 300px; /* Ustaw maksymalną wysokość okna */
+            max-height: 300px;
             margin-bottom: 30px;
         }
 
@@ -197,13 +197,11 @@
             </a>
 
             <h2>Wykresy</h2>
-            <!-- Rząd 1: Temperatura i Ciśnienie -->
             <div class="plot-row">
                 <div id="temperature-plot" class="plot-container"></div>
                 <div id="pressure-plot" class="plot-container"></div>
             </div>
 
-            <!-- Rząd 2: Obrót i Przyspieszenie -->
             <div class="plot-row">
                 <div id="rotation-plot" class="plot-container"></div>
                 <div id="acceleration-plot" class="plot-container"></div>
@@ -283,12 +281,10 @@
             </div>
             
             <script>
-                // Dane do wykresów temperatury i ciśnienia
                 const timestamps = {{ measurements | map(attribute='timestamp') | list | tojson }};
                 const temperatures = {{ measurements | map(attribute='temperature') | list | tojson }};
                 const pressures = {{ measurements | map(attribute='pressure') | list | tojson }};
 
-                // Dane do wykresów obrotu i przyspieszenia
                 const rotationTimestamps = {{ rotation_data | map(attribute='timestamp') | list | tojson }};
                 const rotations_x = {{ rotation_data | map(attribute='rotation_degrees_x') | list | tojson }};
                 const rotations_y = {{ rotation_data | map(attribute='rotation_degrees_y') | list | tojson }};
@@ -297,7 +293,6 @@
                 const gy = {{ rotation_data | map(attribute='gy') | list | tojson }};
                 const gz = {{ rotation_data | map(attribute='gz') | list | tojson }};
 
-                // Wykres temperatury
                 Plotly.newPlot('temperature-plot', [{
                     x: timestamps,
                     y: temperatures,
@@ -311,7 +306,6 @@
                     yaxis: { title: 'Temperatura (°C)' }
                 });
 
-                // Wykres ciśnienia
                 Plotly.newPlot('pressure-plot', [{
                     x: timestamps,
                     y: pressures,
@@ -325,7 +319,6 @@
                     yaxis: { title: 'Ciśnienie (hPa)' }
                 });
 
-                // Wykres stopni obrotu
                 Plotly.newPlot('rotation-plot', [
                     {
                         x: rotationTimestamps,
@@ -357,7 +350,6 @@
                     yaxis: { title: 'Prędkość kątowa (°/s)' }
                 });
 
-                // Wykres przyspieszenia
                 Plotly.newPlot('acceleration-plot', [
                     {
                         x: rotationTimestamps,

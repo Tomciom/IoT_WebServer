@@ -6,34 +6,27 @@ bp = Blueprint('boards', __name__)
 def delete_related_journey_data(mac_address):
     conn = sqlite3.connect('journeys.db')
     c = conn.cursor()
-    
-    # Delete from temperature_pressure
+
     c.execute('DELETE FROM temperature_pressure WHERE mac_address = ?', (mac_address,))
-    
-    # Delete from fire_detection
+
     c.execute('DELETE FROM fire_detection WHERE mac_address = ?', (mac_address,))
-    
-    # Delete from rotation_acceleration
+
     c.execute('DELETE FROM rotation_acceleration WHERE mac_address = ?', (mac_address,))
-    
-    # Delete from journeys
+
     c.execute('DELETE FROM journeys WHERE mac_address = ?', (mac_address,))
     
     conn.commit()
     conn.close()
 
 def delete_board_and_related_data(board_id, mac_address):
-    # Delete from Users.db
     conn = sqlite3.connect('Users.db')
     c = conn.cursor()
     c.execute('DELETE FROM user_boards WHERE id = ?', (board_id,))
     conn.commit()
     conn.close()
 
-    # Delete from journeys.db
     delete_related_journey_data(mac_address)
 
-# Function to fetch all boards for a specific user from the database
 def get_user_boards(username):
     conn = sqlite3.connect('Users.db')
     conn.row_factory = sqlite3.Row
@@ -47,7 +40,6 @@ def get_user_boards(username):
     conn.close()
     return boards
 
-# Function to update the name of a specific board
 def update_board_name(board_id, new_name):
     conn = sqlite3.connect('Users.db')
     c = conn.cursor()
@@ -55,7 +47,6 @@ def update_board_name(board_id, new_name):
     conn.commit()
     conn.close()
 
-# Function to toggle board usage status
 def toggle_board_usage(board_id, in_use):
     conn = sqlite3.connect('Users.db')
     c = conn.cursor()
@@ -69,15 +60,13 @@ def boards(username):
         return redirect(url_for('home.home'))
     
     if request.method == 'POST':
-        # Obsługa przycisku "Resetuj"
         if 'reset' in request.form:
             board_id = request.form.get('board_id')
             if board_id:
-                toggle_board_usage(board_id, 0)  # Ustawia is_in_use na 0
+                toggle_board_usage(board_id, 0)
             return redirect(url_for('boards.boards', username=username))
 
     if request.method == 'POST':
-        # Obsługa przycisku "Usuń"
         if 'delete' in request.form:
             board_id = request.form.get('board_id')
             mac_address = request.form.get('mac_address')
@@ -85,7 +74,6 @@ def boards(username):
                 delete_board_and_related_data(board_id, mac_address)
             return redirect(url_for('boards.boards', username=username))
 
-        # Obsługa zmiany nazwy i statusu
         board_id = request.form.get('board_id')
         new_name = request.form.get('new_name')
         in_use = request.form.get('is_in_use')

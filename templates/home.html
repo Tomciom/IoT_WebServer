@@ -136,10 +136,9 @@
             }
 
             function generateNewCode() {
-                const newCode = Math.floor(100000 + Math.random() * 900000); // Generate random 6-digit code
+                const newCode = Math.floor(100000 + Math.random() * 900000);
                 document.getElementById('code').textContent = newCode;
 
-                // Send the code to the backend (adjust the URL to match your backend route)
                 fetch('/', {
                     method: 'POST',
                     headers: {
@@ -150,7 +149,6 @@
                 .then(response => response.json())
                 .then(data => {
                     if (data.message) {
-                        // alert(data.message);
                     } else {
                         alert('Kod został wysłany, ale brak wiadomości zwrotnej.');
                     }
@@ -163,13 +161,12 @@
             function resetCodeAndTimer() {
                 clearInterval(countdown);
                 generateNewCode();
-                startTimer(90); // Restart timer for 1:30
+                startTimer(90);
             }
 
-            // Start the initial timer and generate a new code on page load
             window.onload = function() {
                 generateNewCode();
-                startTimer(90); // 1:30 in seconds
+                startTimer(90);
             };
         </script>
     {% else %}

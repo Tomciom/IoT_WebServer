@@ -11,12 +11,10 @@ def register():
         password = request.form['password']
         confirm_password = request.form['confirm_password']
 
-        # Sprawdzenie, czy hasła są zgodne
         if password != confirm_password:
             flash('Hasła nie są zgodne! Spróbuj ponownie.')
             return redirect(url_for('register.register'))
         try:
-        # Zapis do bazy danych
             conn = sqlite3.connect('Users.db')
             c = conn.cursor()
             c.execute("INSERT INTO users (username, password) VALUES (?, ?)", (username, password))

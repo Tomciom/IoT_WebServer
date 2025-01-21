@@ -8,12 +8,10 @@ def get_latest_journey_id_for_user():
     if not username:
         return None
 
-    # Krok 1: Pobranie user_id na podstawie username oraz adresów MAC powiązanych z tym użytkownikiem
     conn_users = sqlite3.connect('Users.db')
     conn_users.row_factory = sqlite3.Row
     cur_users = conn_users.cursor()
 
-    # Pobierz user_id
     cur_users.execute("SELECT id FROM users WHERE username = ?", (username,))
     user_row = cur_users.fetchone()
     if not user_row:
@@ -21,21 +19,17 @@ def get_latest_journey_id_for_user():
         return None
     user_id = user_row['id']
 
-    # Pobierz wszystkie adresy MAC powiązane z tym użytkownikiem
     cur_users.execute("SELECT mac_address FROM user_boards WHERE user_id = ?", (user_id,))
     boards = cur_users.fetchall()
     conn_users.close()
 
-    # Lista adresów MAC
     mac_addresses = [row['mac_address'] for row in boards]
     if not mac_addresses:
         return None
 
-    # Krok 2: Wyszukaj najnowszą podróż dla tych adresów MAC
     conn_journeys = sqlite3.connect('journeys.db')
     cur_journeys = conn_journeys.cursor()
 
-    # Przygotowanie placeholderów dla klauzuli IN SQL
     placeholders = ','.join('?' for _ in mac_addresses)
     query = f"""
         SELECT id 

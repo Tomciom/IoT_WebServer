@@ -6,18 +6,15 @@ bp = Blueprint('journey_details', __name__)
 
 def get_journey_data(journey_id):
     conn = sqlite3.connect('journeys.db')
-    conn.row_factory = sqlite3.Row  # Umożliwia dostęp do kolumn po nazwie
+    conn.row_factory = sqlite3.Row
     cursor = conn.cursor()
 
-    # Pobierz dane pomiarowe temperatury i ciśnienia
     cursor.execute('SELECT timestamp, temperature, pressure FROM temperature_pressure WHERE journey_id = ?', (journey_id,))
     measurements = cursor.fetchall()
 
-    # Pobierz dane statusów związanych z wykryciem ognia
     cursor.execute('SELECT timestamp, fire_detected, sensor_value FROM fire_detection WHERE journey_id = ?', (journey_id,))
     fire_data = cursor.fetchall()
 
-    # Pobierz dane obrotu i przyspieszenia
     cursor.execute('SELECT timestamp, rotation_degrees_x, rotation_degrees_y, rotation_degrees_z, gx, gy, gz FROM rotation_acceleration WHERE journey_id = ?', (journey_id,))
     rotation_data = cursor.fetchall()
 
@@ -43,21 +40,18 @@ def download_csv(journey_id):
     output = io.StringIO()
     writer = csv.writer(output)
 
-    # Sekcja: Pomiary
     writer.writerow(['Pomiary'])
     writer.writerow(['Timestamp', 'Temperatura (°C)', 'Ciśnienie (hPa)'])
     for row in measurements:
         writer.writerow([row['timestamp'], row['temperature'], row['pressure']])
     writer.writerow([])
 
-    # Sekcja: Wykrycie ognia
     writer.writerow(['Wykrycie światła'])
     writer.writerow(['Timestamp', 'Wykryto światło', 'Wartość czujnika'])
     for row in fire_data:
         writer.writerow([row['timestamp'], row['fire_detected'], row['sensor_value']])
     writer.writerow([])
 
-    # Sekcja: Obrót i przyspieszenie
     writer.writerow(['Prędkość kątowa i Przyspieszenie'])
     writer.writerow(['Timestamp', 'Prędkość w x (°/s)', 'Prędkość w y (°/s)', 'Prędkość w z (°/s)', 'GX', 'GY', 'GZ'])
     for row in rotation_data:
